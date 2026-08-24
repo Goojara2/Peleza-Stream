@@ -1,0 +1,64 @@
+name: Build Peleza Stream Android
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon clean assembleDebug
+
+      - name: Prepare APK artifact
+        shell: bash
+        run: |
+          set -e
+          APK=$(find app/build/outputs/apk/debug -type f -name '*.apk' | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "No APK was generated."
+            exit 1
+          fi
+          mkdir -p build-artifacts
+          cp "$APK" build-artifacts/Peleza-Stream.apk
+          echo "APK created: build-artifacts/Peleza-Stream.apk"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: Peleza-Stream-APK
+          path: build-artifacts/Peleza-Stream.apk
+          if-no-files-found: error
+          retention-days: 30
