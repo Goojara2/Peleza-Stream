@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Peleza Stream</string>
+    <string name="site_url">https://pelezastream.top/</string>
+    <string name="download_started">Download started</string>
+    <string name="download_failed">Unable to start download</string>
+    <string name="file_picker_failed">Unable to open file picker</string>
+</resources>
